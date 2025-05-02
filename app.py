@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect, request
 import sqlite3
 
 app = Flask(__name__)
@@ -33,6 +33,23 @@ def index():
     sql = "SELECT * FROM Sheets"
     results = query_db(sql)
     return render_template('index.html', results=results)
+
+
+@app.route('/add_sheets', methods=['GET','POST'])
+def add_sheets():
+    # get the form data from the request object
+    sheetname = request.form['sheetname']
+    composer = request.form['composer']
+    instrument = request.form['instrument']
+    file_path = request.form['file_path']
+    uploader_id = request.form['uploader_id']
+    download_count = request.form['download_count']
+    # create a query to insert the data
+    sql = "INSERT INTO sheets (sheetname, composer, instrument, file_path, uploader_id, download_count) VALUES (?, ?, ?, ?, ?, ?);"
+    # execute the query
+    query_db(sql, args=(sheetname, composer, instrument, file_path, uploader_id, download_count))
+    # redirect back to the home page
+    return redirect('/')
 
 
 # this is the app with debug on
