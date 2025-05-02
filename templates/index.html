@@ -33,5 +33,30 @@
         </tr>
         {% endfor %}
     </table>
+    <!-- make a form to input a new sheets -->
+     <form action={{url_for("add_sheets")}} method="POST">
+        <label for="sheetname">Sheet name:</label>
+        <input type="text", id="sheetname", name="sheetname"><br>
+
+        <label for="composer name">Composer name:</label>
+        <input type="text", id="composer", name="composer"><br>
+
+        <label for="instrument">Instrument:</label>
+        <input type="text", id="instrument", name="instrument"><br>
+        
+        <label for="file_path">File Path:</label>
+        <input type="text", id="file_path", name="file_path"><br>
+        
+        <label for="uploader_id">Uploader_id:</label>
+        <input type="text", id="uploader_id", name="uploader_id"><br>
+        
+        <label for="download_count">Download_count:</label>
+        <input type="text", id="download_count", name="download_count"><br>
+        
+        <input type="submit" value="Submit">
+
+
+     </form>
+
 </body>
 </html>
