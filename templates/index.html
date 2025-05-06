@@ -1,12 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    <h1>Hello from my first template</h1>
+<!-- This will inherit layout from parents: base.html -->
+{% extends 'base.html' %}
+<!-- Now I can fill out the block by myself-->
+{% block content %}  
+<h1>Hello from my first template</h1>
 
     <table>
         <tr>
@@ -58,5 +54,5 @@
 
      </form>
 
-</body>
-</html>
+{% endblock %}
+ 
