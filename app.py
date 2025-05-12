@@ -28,6 +28,33 @@ def query_db(sql, args=(), one=False):
 
 
 #route go here
+@app.route("/home")
+def home():
+    return render_template('home.html')
+
+@app.route('/sheet')
+def sheet():
+    return render_template('sheet.html')
+
+@app.route('/composer')
+def composer():
+    return render_template('composer.html')
+
+@app.route('/search')
+def search():
+    return render_template('search.html')
+
+@app.route('/upload')
+def upload():
+    return render_template('upload.html')
+
+@app.route('/download')
+def download():
+    return render_template('download.html')
+
+
+
+
 @app.route("/")
 def index():
     sql = "SELECT * FROM Sheets"
