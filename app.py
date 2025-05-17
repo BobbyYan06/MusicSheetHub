@@ -32,6 +32,15 @@ def query_db(sql, args=(), one=False):
 def home():
     return render_template('home.html')
 
+@app.route('/signup')
+def signup():
+    return render_template('signup.html')
+
+@app.route('/login')
+def login():
+    return render_template('login.html')
+
+
 @app.route('/sheet')
 def sheet():
     return render_template('sheet.html')
