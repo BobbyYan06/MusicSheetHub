@@ -1,8 +1,8 @@
-from flask import Flask, render_template, redirect, request
+from flask import Flask, render_template, redirect, request, flash, redirect, url_for
 import sqlite3
 
 app = Flask(__name__)
-
+app.secret_key = 'Bobby'
 #path and filename for the database
 DATABASE = "musicsheethub.db"
 
@@ -32,8 +32,30 @@ def query_db(sql, args=(), one=False):
 def home():
     return render_template('home.html')
 
-@app.route('/signup')
+@app.route('/signup', methods=['GET', 'POST'])
 def signup():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        confirm = request.form.get('confirmpassword')
+
+        if password != confirm:
+            return redirect(url_for('signup'))
+        
+        try:
+            connect = sqlite3.connect(DATABASE)
+            cursor = connect.cursor()
+            cursor.execute('INSERT INTO users (username, email, password) VALUES (?, ?, ?)', (username, email, password))
+            connect.commit()
+            flash('Account created!Please log in.', 'success')
+        except sqlite3.IntegrityError:
+            flash('Username already exists.', 'danger')
+        finally:
+            connect.close()
+
+        return redirect(url_for('login'))
+    
     return render_template('signup.html')
 
 @app.route('/login')
