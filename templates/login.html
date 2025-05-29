@@ -9,7 +9,7 @@
             <p class="col-lg-10 fs-4">Login to MusicSheetHub and enjoy music every day!</p>
         </div>
         <div class="col-md-10 mx-auto col-lg-5">
-            <form class="p-4 p-md-5 border rounded-3 bg-body-tertiary">
+            <form class="p-4 p-md-5 border rounded-3 bg-body-tertiary" method="post" action="{{url_for('login')}}">
                 <!-- Username -->
                 <div class="form-floating mb-3">
                     <input type="text" class="form-control" id="floatingUsername" placeholder="Enter your username">

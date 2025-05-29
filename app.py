@@ -58,8 +58,22 @@ def signup():
     
     return render_template('signup.html')
 
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST']) 
 def login():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        
+        connect = sqlite3.connect(DATABASE)
+        cursor = connect.cursor()
+        cursor.execute('SELECT password from Users where username=?', (username, ))
+        row = cursor.fetchone()
+
+        if row == password:
+            flash("Login success", 'success')
+            return redirect('home')
+        else:
+            flash('Invalid username or password', 'danger')
     return render_template('login.html')
 
 
