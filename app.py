@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, request, flash, redirect, url_for
+from flask import Flask, render_template, redirect, request, flash, redirect, url_for, session
 import sqlite3
 
 app = Flask(__name__)
@@ -41,6 +41,7 @@ def signup():
         confirm = request.form.get('confirmpassword')
 
         if password != confirm:
+            flash('Password do not match.', 'danger')
             return redirect(url_for('signup'))
         
         try:
@@ -66,10 +67,10 @@ def login():
         
         connect = sqlite3.connect(DATABASE)
         cursor = connect.cursor()
-        cursor.execute('SELECT password from Users where username=?', (username, ))
+        cursor.execute('SELECT password from Users where username = ?', (username, ))
         row = cursor.fetchone()
 
-        if row == password:
+        if row[0] == password:
             flash("Login success", 'success')
             return redirect('home')
         else:

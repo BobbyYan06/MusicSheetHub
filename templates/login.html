@@ -12,31 +12,25 @@
             <form class="p-4 p-md-5 border rounded-3 bg-body-tertiary" method="post" action="{{url_for('login')}}">
                 <!-- Username -->
                 <div class="form-floating mb-3">
-                    <input type="text" class="form-control" id="floatingUsername" placeholder="Enter your username">
-                    <label for="floatingUsername">Username</label>
+                    <input type="text" class="form-control" id="Username" name="username" placeholder="Enter your username">
+                    <label for="Username">Username</label>
                 </div>
 
                 <!-- Password -->
                 <div class="form-floating mb-3">
-                    <input type="password" class="form-control" id="floatingPassword" placeholder="Password">
-                    <label for="floatingPassword">Password</label>
+                    <input type="password" class="form-control" id="Password" name="password" placeholder="Password">
+                    <label for="Password">Password</label>
                 </div>
 
                 <!-- Remember Me -->
                 <div class="checkbox mb-3">
-                    <label>
-                        <input type="checkbox" value="remember-me"> Remember me
-                    </label>
+                    <input type="checkbox" class="form-check-input" id="remember" name="remember">
+                    <label for="remember">Remember me</label>
                 </div>
 
                 <!-- Submit -->
                 <button class="w-100 btn btn-lg btn-primary" type="submit">Login</button>
 
-                <!-- Terms -->
-                <hr class="my-4">
-                <small class="text-body-secondary">
-                    By clicking Login, you agree to the <a href="#">terms of use</a>.
-                </small>
             </form>
         </div>
     </div>
