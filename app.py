@@ -61,6 +61,10 @@ def signup():
 
 @app.route('/login', methods=['GET', 'POST']) 
 def login():
+    if 'username' in session:
+        flash('You are already logged in.', 'warning')
+        return redirect(url_for('home'))
+    
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
@@ -71,7 +75,9 @@ def login():
         row = cursor.fetchone()
 
         if row[0] == password:
+            session['username'] = username
             flash("Login success", 'success')
+
             return redirect('home')
         else:
             flash('Invalid username or password', 'danger')
