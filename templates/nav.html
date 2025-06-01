@@ -28,10 +28,29 @@
             </form>
 
             <!-- Right auth buttons -->
-            <div class="d-flex">
+             <div class="text-end">
+                {% if session.get('username') %}
+                <div class="dropdown">
+                    <button class="btn text-white dropdown-toggle d-flex align-items-center gap-2" type="button"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                        <div class="rounded-circle bg-light text-primary fw-bold d-flex justify-content-center align-items-center"
+                        style="width: 32px; height: 32px;">
+                        {{ session['username'][0]|upper }}
+                        </div>
+                        {{ session['username'] }}
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="{{url_for('profile') }}">Profile</a></li>
+                        <li> <hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{{url_for('logout') }}">Logout</a></li>
+                    </ul>
+                </div>
+                {% else %}
                 <a href="{{ url_for('login') }}" class="btn btn-outline-light me-2">Login</a>
                 <a href="{{ url_for('signup') }}" class="btn btn-outline-light">Sign-up</a>
-            </div>
+                {% endif %}
+             </div>
+
         </div>
     </div>
 </nav>

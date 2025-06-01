@@ -84,6 +84,14 @@ def login():
     return render_template('login.html')
 
 
+@app.route('/profile')
+def profile():
+    return render_template('profile.html')
+
+@app.route('/logout')
+def logout():
+    return render_template('logout.html')
+
 @app.route('/sheet')
 def sheet():
     return render_template('sheet.html')
