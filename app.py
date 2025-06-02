@@ -90,7 +90,9 @@ def profile():
 
 @app.route('/logout')
 def logout():
-    return render_template('logout.html')
+    session.pop('username', None)
+    flash('You have been logged out', 'warning')
+    return render_template('home.html')
 
 @app.route('/sheet')
 def sheet():
