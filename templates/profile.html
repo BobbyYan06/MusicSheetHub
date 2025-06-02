@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3">
+            <div class="list-group">
+                <a href="{{ url_for('profile', tab='account') }}" class="list-group-item">
+                    My Account
+                </a>
+                <a href="{{ url_for('profile', tab='upload') }}" class="list-group-item">
+                    Upload Sheet
+                </a>
+                <a href="{{ url_for('profile', tab='sheets') }}" class="list-group-item">
+                    My Sheets
+                </a>
+                <a href="{{ url_for('profile', tab='downloads') }}" class="list-group-item">
+                    My Download
+                </a>
+                <a href="{{ url_for('profile', tab='favorites') }}" class="list-group-item">
+                    My Favorites
+                </a>
+                <a href="{{ url_for('profile', tab='password') }}" class="list-group-item">
+                    Change Password
+                </a>
+            </div>
+        </div>
+
+        <!-- Right Panel -->
+        <div class="col-md-9">
+            {% if tab == 'account' %}
+                {% include 'profile/account.html' %}
+            {% elif tab == 'upload' %}
+                {% include 'profile/upload.html' %}
+            {% elif tab == 'sheets' %}
+                {% include 'profile/sheets.html' %}
+            {% elif tab == 'downloads' %}
+                {% include 'profile/downloads.html' %}
+            {% elif tab == 'favorites' %}
+                {% include 'profile/favorites.html' %}
+            {% elif tab == 'password' %}
+                {% include 'profile/password.html' %}
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+{% endblock %}

@@ -86,7 +86,8 @@ def login():
 
 @app.route('/profile')
 def profile():
-    return render_template('profile.html')
+    tab = request.args.get('tab', 'account')
+    return render_template('profile.html', tab=tab)
 
 @app.route('/logout')
 def logout():
