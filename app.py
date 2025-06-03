@@ -84,10 +84,27 @@ def login():
     return render_template('login.html')
 
 
-@app.route('/profile')
+@app.route('/profile', methods=['GET', 'POST'])
 def profile():
     tab = request.args.get('tab', 'account')
-    return render_template('profile.html', tab=tab)
+    username = session['username']
+
+    connect = sqlite3.connect(DATABASE)
+    cursor = connect.cursor()
+
+    if request.method == 'POST':
+        form_type = request.form.get('form_type')
+        if form_type == 'profile_update':
+            new_email = request.form.get('email')
+            if new_email:
+                cursor.execute("UPDATE users SET email = ? WHERE username = ?", (new_email, username))
+                flash("Email updated.", "success")
+
+    # load user email information
+    cursor.execute("SELECT email from users WHERE username = ?", (username,))
+    row = cursor.fetchone()
+    email = row[0] if row else ''
+    return render_template('profile.html', tab=tab, username=username, email=email)
 
 @app.route('/logout')
 def logout():

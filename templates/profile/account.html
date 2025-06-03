@@ -1,1 +1,17 @@
-<h1>This is account page</h1>
+<h4>My Account</h4>
+<form method="POST" enctype="multipart/form-data" action="{{ url_for('profile') }}">
+    <input type="hidden" name="form_type" value="profile_update">
+
+
+    <div class="mb-3">
+        <label class="form-label">Username</label>
+        <input type="text" class="form-control" value="{{ username }}" disabled>
+    </div>
+
+    <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input type="email" class="form-control" name="email" id="email" value="{{ email }}">
+    </div>
+
+    <button type="submit" class="btn btn-primary">Update Account</button>
+</form>
