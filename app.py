@@ -99,6 +99,27 @@ def profile():
             if new_email:
                 cursor.execute("UPDATE users SET email = ? WHERE username = ?", (new_email, username))
                 flash("Email updated.", "success")
+        
+        elif form_type == 'change_password':
+            current_password = request.form.get('current_password')
+            new_password = request.form.get('new_password')
+            confirm_password = request.form.get('confirm_password')
+
+            cursor.execute("SELECT password FROM users WHERE username = ?", (username,))
+            row = cursor.fetchone()
+            if not row:
+                flash("User not found.", "danger")
+            elif row[0] != current_password:
+                flash("Current password is incorrect.", "danger")
+            elif new_password != confirm_password:
+                flash("New passwords do not match.", "danger")
+            else:
+                cursor.execute("Update users SET password = ? WHERE username = ?", (new_password, username))
+                connect.commit()
+                flash("Password updated successfully.", "success")
+
+            return redirect(url_for('profile', tab='account'))
+
 
     # load user email information
     cursor.execute("SELECT email from users WHERE username = ?", (username,))
