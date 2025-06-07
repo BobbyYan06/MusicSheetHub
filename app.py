@@ -1,10 +1,24 @@
 from flask import Flask, render_template, redirect, request, flash, redirect, url_for, session
 import sqlite3
+import os
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.secret_key = 'Bobby'
 #path and filename for the database
 DATABASE = "musicsheethub.db"
+
+# Configurations for file uploads
+UPLOAD_FILES = 'static/files'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'pdf'}
+MAX_CONTENT_LENGTH = 5 * 1024 * 1024 #5MB limit
+
+app.config['UPLOAD_FILES'] = UPLOAD_FILES
+app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
+
+# Helper function to check if a file is allowed based on extension
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # function to automatically connect and query
 def query_db(sql, args=(), one=False):
@@ -119,7 +133,26 @@ def profile():
                 flash("Password updated successfully.", "success")
 
             return redirect(url_for('profile', tab='account'))
+        
+        elif form_type == 'upload_sheet':
+            file = request.files.get('file')
+            sheetname = request.form.get('sheetname')
+            composer = request.form.get('composer')
+            instrument = request.form.get('instrument')
 
+            if file and allowed_file(file.filename):
+                filename = f"{username}_{secure_filename(file.filename)}"
+                filepath = os.path.join(app.config['UPLOAD_FILES'], filename)
+                file.save(filepath)
+
+                cursor.execute("INSERT INTO sheets (sheetname, file_path, composer, instrument) VALUES (?, ?, ?, ?)", 
+                               (sheetname, filename, composer, instrument))
+                connect.commit()
+                flash('Sheet uploaded successfully.', 'success')
+            else:
+                flash('Invalid file type.', 'danger')
+
+            return redirect(url_for('profile', tab='sheets'))
 
     # load user email information
     cursor.execute("SELECT email from users WHERE username = ?", (username,))
