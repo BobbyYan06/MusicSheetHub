@@ -1,1 +1,39 @@
-<h1>This is sheet page</h1>
+<h4 class="mb-4">My Uploaded Sheets</h4>
+
+{% if sheets %}
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover allign middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Sheet Name</th>
+                    <th>File Name</th>
+                    <th>Composer</th>
+                    <th>Instrument</th>
+                    <th>Uploaded at</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sheet in sheets %}
+                <tr>
+                    <td>{{ sheet[1] }}</td>
+                    <td>{{ sheet[2] }}</td>
+                    <td>{{ sheet[3] }}</td>
+                    <td>{{ sheet[4] }}</td>
+                    <td>{{ sheet[5] }}</td>
+                    <td>
+                        <!-- Edit Button -->
+                         <button class="btn btn-sm btn-primary">Edit</button>
+                         <!-- Delete Button -->
+                         <button class="btn btn-sm btn-primary">Delete</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+
+    </div>
+{% else %}
+    <p class="text-muted">You haven't uploaded any sheets yet.</p>
+{% endif %}

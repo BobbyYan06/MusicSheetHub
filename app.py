@@ -100,11 +100,14 @@ def login():
 
 @app.route('/profile', methods=['GET', 'POST'])
 def profile():
-    tab = request.args.get('tab', 'account')
+    active_tab = request.args.get('tab', 'account')
     username = session['username']
 
     connect = sqlite3.connect(DATABASE)
     cursor = connect.cursor()
+
+    cursor.execute("SELECT id FROM users WHERE username=?", (username, ))
+    user_id = str(cursor.fetchone())
 
     if request.method == 'POST':
         form_type = request.form.get('form_type')
@@ -145,8 +148,8 @@ def profile():
                 filepath = os.path.join(app.config['UPLOAD_FILES'], filename)
                 file.save(filepath)
 
-                cursor.execute("INSERT INTO sheets (sheetname, file_path, composer, instrument) VALUES (?, ?, ?, ?)", 
-                               (sheetname, filename, composer, instrument))
+                cursor.execute("INSERT INTO sheets (sheetname, file_path, composer, instrument, uploader_id) VALUES (?, ?, ?, ?,?)", 
+                               (sheetname, filename, composer, instrument, user_id))
                 connect.commit()
                 flash('Sheet uploaded successfully.', 'success')
             else:
@@ -158,7 +161,15 @@ def profile():
     cursor.execute("SELECT email from users WHERE username = ?", (username,))
     row = cursor.fetchone()
     email = row[0] if row else ''
-    return render_template('profile.html', tab=tab, username=username, email=email)
+
+    # Load user sheets if viewing sheets tab
+    sheets = []
+    if active_tab == 'sheets':
+        cursor.execute("SELECT id, sheetname, file_path, composer, instrument, created_at FROM sheets WHERE uploader_id = ? ORDER BY created_at DESC", (user_id, ))
+        sheets = cursor.fetchall()
+
+    return render_template('profile.html', tab=active_tab, username=username, email=email, sheets=sheets)
+
 
 @app.route('/logout')
 def logout():
