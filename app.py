@@ -88,7 +88,7 @@ def login():
         cursor.execute('SELECT password from Users where username = ?', (username, ))
         row = cursor.fetchone()
 
-        if row[0] == password:
+        if row and row[0] == password:
             session['username'] = username
             flash("Login success", 'success')
 
