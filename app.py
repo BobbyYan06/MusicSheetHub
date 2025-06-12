@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, request, flash, redirect, url_for, session
+from flask import Flask, render_template, redirect, request, flash, redirect, url_for, session, send_from_directory
 import sqlite3
 import os
 from werkzeug.utils import secure_filename
@@ -44,7 +44,15 @@ def query_db(sql, args=(), one=False):
 #route go here
 @app.route("/home")
 def home():
-    return render_template('home.html')
+    connect = sqlite3.connect(DATABASE)
+    cursor = connect.cursor()
+    # Top 12 download sheets
+    cursor.execute('''SELECT file_path, sheetname, composer, Instrument, download_count FROM sheets ORDER BY
+                   download_count DESC LIMIT 12'''
+    )
+    top_download = cursor.fetchall()
+    return render_template('home.html', top_download=top_download)
+
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -222,6 +230,11 @@ def add_sheets():
     query_db(sql, args=(sheetname, composer, instrument, file_path, uploader_id, download_count))
     # redirect back to the home page
     return redirect('/')
+
+# Preview file in browser
+@app.route('/preview/<filename>')
+def preview_file(filename):
+    return send_from_directory(app.config['UPLOAD_FILES'], filename, as_attachment=False)
 
 
 # this is the app with debug on
