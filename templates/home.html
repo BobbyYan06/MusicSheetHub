@@ -34,7 +34,7 @@
                         <p class="card-text small">Composer: {{ sheet[2] or "N/A" }}</p>
                         <p class="card-text small">Downloads: {{ sheet[4] }}</p>
                         <div class="d-flex justify-content-between mt-3">
-                            <a href="#" class="btn btn-sm btn-primary">
+                            <a href="{{ url_for('download_file', filename=sheet[0]) }}" class="btn btn-sm btn-primary">
                             <i class="bi bi-download"></i>Download
                             </a>
 

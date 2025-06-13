@@ -201,10 +201,18 @@ def search():
 def upload():
     return render_template('upload.html')
 
-@app.route('/download')
-def download():
-    return render_template('download.html')
+@app.route('/download/<filename>')
+def download_file(filename):
+    if 'username' not in session:
+        flash('Please log in to download', 'warning')
+        return redirect(url_for('login'))
+    
+    connect = sqlite3.connect(DATABASE)
+    cursor = connect.cursor()
+    cursor.execute("UPDATE Sheets SET download_count = download_count + 1 WHERE file_path = ?", (filename,))
 
+    connect.commit()
+    return send_from_directory(app.config['UPLOAD_FILES'], filename, as_attachment=True)
 
 
 
