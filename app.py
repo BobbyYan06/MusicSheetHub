@@ -214,6 +214,27 @@ def download_file(filename):
     connect.commit()
     return send_from_directory(app.config['UPLOAD_FILES'], filename, as_attachment=True)
 
+# favourite file
+@app.route('/favourite/<filename>')
+def favourite_file(filename):
+    if 'username' not in session:
+        flash('Please log in to download', 'warning')
+        return redirect(url_for('login'))
+    
+    connect = sqlite3.connect(DATABASE)
+    cursor = connect.cursor()
+    cursor.execute('SELECT sheetname, composer, instrument FROM sheets WHERE file_path = ?', (filename,))
+    row = cursor.fetchone()
+
+    if row:
+        username = session['username']
+        sheetname, composer, instrument = row
+        cursor.execute('INSERT INTO favourites (username, filename, sheetname, composer, instrument) VALUES (?, ?, ?, ?, ?)', (username, filename, sheetname, composer, instrument))
+
+    connect.commit()
+    flash('File was added to favourite.', 'success')
+    return redirect(url_for('home'))
+
 
 
 @app.route("/")
