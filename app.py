@@ -51,7 +51,13 @@ def home():
                    download_count DESC LIMIT 12'''
     )
     top_download = cursor.fetchall()
-    return render_template('home.html', top_download=top_download)
+
+    # Top 12 uploaded sheets
+    cursor.execute('''SELECT file_path, sheetname, composer, Instrument, download_count FROM sheets ORDER BY
+                   created_at DESC LIMIT 12'''
+    )
+    latest_uploaded = cursor.fetchall()
+    return render_template('home.html', top_download=top_download, latest_uploaded = latest_uploaded)
 
 
 @app.route('/signup', methods=['GET', 'POST'])
