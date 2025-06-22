@@ -179,7 +179,7 @@ def profile():
     # Load user sheets if viewing sheets tab
     sheets = []
     if active_tab == 'sheets':
-        cursor.execute("SELECT id, sheetname, file_path, composer, instrument, created_at FROM sheets WHERE uploader_id = ? ORDER BY created_at DESC", (user_id, ))
+        cursor.execute("SELECT id, file_path, sheetname, composer, instrument, created_at FROM sheets WHERE uploader_id = ? ORDER BY created_at DESC", (user_id, ))
         sheets = cursor.fetchall()
 
     return render_template('profile.html', tab=active_tab, username=username, email=email, sheets=sheets)

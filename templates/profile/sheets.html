@@ -1,39 +1,34 @@
 <h4 class="mb-4">My Uploaded Sheets</h4>
 
 {% if sheets %}
-    <div class="table-responsive">
-        <table class="table table-bordered table-hover allign middle">
-            <thead class="table-light">
-                <tr>
-                    <th>Sheet Name</th>
-                    <th>File Name</th>
-                    <th>Composer</th>
-                    <th>Instrument</th>
-                    <th>Uploaded at</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for sheet in sheets %}
-                <tr>
-                    <td>{{ sheet[1] }}</td>
-                    <td>{{ sheet[2] }}</td>
-                    <td>{{ sheet[3] }}</td>
-                    <td>{{ sheet[4] }}</td>
-                    <td>{{ sheet[5] }}</td>
-                    <td>
-                        <!-- Edit Button -->
-                         <button class="btn btn-sm btn-primary">Edit</button>
-                         <!-- Delete Button -->
-                         <button class="btn btn-sm btn-primary">Delete</button>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
+<div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for sheet in sheets %}
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    {% set ext = sheet[1].split('.')[-1].lower() %}
+                    {% if ext in ['jpg', 'jpeg', 'png', 'gif'] %}
+                    <img src="{{ url_for('preview_file', filename=sheet[1]) }}" class="card-img-top" alt="Sheet Thumbnail"
+                        style="height: 200px; object-fit: cover;">
+                    {% elif ext == 'pdf' %}
+                    <embed src="{{ url_for('preview_file', filename=sheet[1]) }}" type="application/pdf" width="100%"
+                        height="200px" />
+                    {% endif %}
 
-        </table>
+                    
+                    <div class="card-body">
+                        <h6 class="card-title text-truncate">{{ sheet[2] }}</h6>
+                        <p class="card-text small">Composer: {{ sheet[3] or "N/A" }}</p>
+                        <p class="card-text small">Instrument: {{ sheet[4] }}</p>
 
-    </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        {% endfor %}
+</div>
+
 {% else %}
-    <p class="text-muted">You haven't uploaded any sheets yet.</p>
+<p class="text-muted">You haven't uploaded any sheets yet.</p>
 {% endif %}
