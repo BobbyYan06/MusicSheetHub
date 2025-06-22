@@ -19,26 +19,26 @@
         {% for sheet in top_download %}
             <div class="col">
                 <div class="card h-100 shadow-sm">
-                    {% set ext = sheet[0].split('.')[-1].lower() %}
+                    {% set ext = sheet[1].split('.')[-1].lower() %}
                     {% if ext in ['jpg', 'jpeg', 'png', 'gif'] %}
-                    <img src="{{ url_for('preview_file', filename=sheet[0]) }}" class="card-img-top" alt="Sheet Thumbnail"
+                    <img src="{{ url_for('preview_file', filename=sheet[1]) }}" class="card-img-top" alt="Sheet Thumbnail"
                         style="height: 200px; object-fit: cover;">
                     {% elif ext == 'pdf' %}
-                    <embed src="{{ url_for('preview_file', filename=sheet[0]) }}" type="application/pdf" width="100%"
+                    <embed src="{{ url_for('preview_file', filename=sheet[1]) }}" type="application/pdf" width="100%"
                         height="200px" />
                     {% endif %}
 
                     
                     <div class="card-body">
-                        <h6 class="card-title text-truncate">{{ sheet[1] }}</h6>
-                        <p class="card-text small">Composer: {{ sheet[2] or "N/A" }}</p>
-                        <p class="card-text small">Downloads: {{ sheet[4] }}</p>
+                        <h6 class="card-title text-truncate">{{ sheet[2] }}</h6>
+                        <p class="card-text small">Composer: {{ sheet[3] or "N/A" }}</p>
+                        <p class="card-text small">Downloads: {{ sheet[5] }}</p>
                         <div class="d-flex justify-content-between mt-3">
-                            <a href="{{ url_for('download_file', filename=sheet[0]) }}" class="btn btn-sm btn-primary">
+                            <a href="{{ url_for('download_file', sheet_id=sheet[0]) }}" class="btn btn-sm btn-primary">
                             <i class="bi bi-download"></i>Download
                             </a>
 
-                            <a href="{{ url_for('favourite_file', filename=sheet[0]) }}" class="btn btn-sm btn-primary">
+                            <a href="{{ url_for('favourite_file', filename=sheet[1]) }}" class="btn btn-sm btn-primary">
                             <i class="bi bi-download"></i>Favourite
                             </a>
                         </div>
@@ -58,26 +58,26 @@
         {% for sheet in latest_uploaded %}
             <div class="col">
                 <div class="card h-100 shadow-sm">
-                    {% set ext = sheet[0].split('.')[-1].lower() %}
+                    {% set ext = sheet[1].split('.')[-1].lower() %}
                     {% if ext in ['jpg', 'jpeg', 'png', 'gif'] %}
-                    <img src="{{ url_for('preview_file', filename=sheet[0]) }}" class="card-img-top" alt="Sheet Thumbnail"
+                    <img src="{{ url_for('preview_file', filename=sheet[1]) }}" class="card-img-top" alt="Sheet Thumbnail"
                         style="height: 200px; object-fit: cover;">
                     {% elif ext == 'pdf' %}
-                    <embed src="{{ url_for('preview_file', filename=sheet[0]) }}" type="application/pdf" width="100%"
+                    <embed src="{{ url_for('preview_file', filename=sheet[1]) }}" type="application/pdf" width="100%"
                         height="200px" />
                     {% endif %}
 
                     
                     <div class="card-body">
-                        <h6 class="card-title text-truncate">{{ sheet[1] }}</h6>
-                        <p class="card-text small">Composer: {{ sheet[2] or "N/A" }}</p>
-                        <p class="card-text small">Downloads: {{ sheet[4] }}</p>
+                        <h6 class="card-title text-truncate">{{ sheet[2] }}</h6>
+                        <p class="card-text small">Composer: {{ sheet[3] or "N/A" }}</p>
+                        <p class="card-text small">Downloads: {{ sheet[5] }}</p>
                         <div class="d-flex justify-content-between mt-3">
-                            <a href="{{ url_for('download_file', filename=sheet[0]) }}" class="btn btn-sm btn-primary">
+                            <a href="{{ url_for('download_file', sheet_id=sheet[0]) }}" class="btn btn-sm btn-primary">
                             <i class="bi bi-download"></i>Download
                             </a>
 
-                            <a href="{{ url_for('favourite_file', filename=sheet[0]) }}" class="btn btn-sm btn-primary">
+                            <a href="{{ url_for('favourite_file', filename=sheet[1]) }}" class="btn btn-sm btn-primary">
                             <i class="bi bi-download"></i>Favourite
                             </a>
                         </div>

@@ -47,13 +47,13 @@ def home():
     connect = sqlite3.connect(DATABASE)
     cursor = connect.cursor()
     # Top 12 download sheets
-    cursor.execute('''SELECT file_path, sheetname, composer, Instrument, download_count FROM sheets ORDER BY
+    cursor.execute('''SELECT id, file_path, sheetname, composer, Instrument, download_count FROM sheets ORDER BY
                    download_count DESC LIMIT 12'''
     )
     top_download = cursor.fetchall()
 
     # Top 12 uploaded sheets
-    cursor.execute('''SELECT file_path, sheetname, composer, Instrument, download_count FROM sheets ORDER BY
+    cursor.execute('''SELECT id, file_path, sheetname, composer, Instrument, download_count FROM sheets ORDER BY
                    created_at DESC LIMIT 12'''
     )
     latest_uploaded = cursor.fetchall()
@@ -181,8 +181,20 @@ def profile():
     if active_tab == 'sheets':
         cursor.execute("SELECT id, file_path, sheetname, composer, instrument, created_at FROM sheets WHERE uploader_id = ? ORDER BY created_at DESC", (user_id, ))
         sheets = cursor.fetchall()
+    
+    # Load user downloads if viewing downloads tab
+    downloads = []
+    if active_tab == 'downloads':
+        cursor.execute('''
+                SELECT id, sheet_id, sheetname, filename, composer, instrument, download_at
+                FROM downloads
+                WHERE username = ?
+                ORDER BY download_at DESC   
+            ''', (username,))
+        downloads = cursor.fetchall()
+        
 
-    return render_template('profile.html', tab=active_tab, username=username, email=email, sheets=sheets)
+    return render_template('profile.html', tab=active_tab, username=username, email=email, sheets=sheets, downloads=downloads)
 
 
 @app.route('/logout')
@@ -207,16 +219,27 @@ def search():
 def upload():
     return render_template('upload.html')
 
-@app.route('/download/<filename>')
-def download_file(filename):
+@app.route('/download/<sheet_id>')
+def download_file(sheet_id):
     if 'username' not in session:
         flash('Please log in to download', 'warning')
         return redirect(url_for('login'))
     
     connect = sqlite3.connect(DATABASE)
     cursor = connect.cursor()
-    cursor.execute("UPDATE Sheets SET download_count = download_count + 1 WHERE file_path = ?", (filename,))
+    sheet_id = str(sheet_id)
+    cursor.execute("UPDATE Sheets SET download_count = download_count + 1 WHERE id = ?", (sheet_id,))
 
+    # Fetch sheet details
+    cursor.execute("SELECT file_path, sheetname, composer, instrument FROM sheets WHERE id = ?", (sheet_id,))
+    row = cursor.fetchone()
+
+    if row:
+        username = session['username']
+        filename, sheetname, composer, instrument = row
+        # Log donwload
+        cursor.execute('''INSERT INTO downloads (sheet_id, username, filename, sheetname, composer, instrument) VALUES (?, ?, ?, ?, ?, ?)''', (sheet_id, username, filename, sheetname, composer, instrument))
+    
     connect.commit()
     return send_from_directory(app.config['UPLOAD_FILES'], filename, as_attachment=True)
 
