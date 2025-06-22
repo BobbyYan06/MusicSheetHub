@@ -42,6 +42,7 @@ def query_db(sql, args=(), one=False):
 
 
 #route go here
+@app.route("/")
 @app.route("/home")
 def home():
     connect = sqlite3.connect(DATABASE)
@@ -192,9 +193,20 @@ def profile():
                 ORDER BY download_at DESC   
             ''', (username,))
         downloads = cursor.fetchall()
+
+    # Load user favourites if viewing favourites tab
+    favourites = []
+    if active_tab == 'favourites':
+        cursor.execute("""
+        SELECT id, sheet_id, sheetname, filename, composer, instrument, favourited_at
+        FROM favourites
+        WHERE username = ?
+        ORDER BY favourited_at DESC
+        """, (username,))
+        favourites = cursor.fetchall()
         
 
-    return render_template('profile.html', tab=active_tab, username=username, email=email, sheets=sheets, downloads=downloads)
+    return render_template('profile.html', tab=active_tab, username=username, email=email, sheets=sheets, downloads=downloads, favourites=favourites)
 
 
 @app.route('/logout')
@@ -244,33 +256,26 @@ def download_file(sheet_id):
     return send_from_directory(app.config['UPLOAD_FILES'], filename, as_attachment=True)
 
 # favourite file
-@app.route('/favourite/<filename>')
-def favourite_file(filename):
+@app.route('/favourite/<sheet_id>')
+def favourite_file(sheet_id):
     if 'username' not in session:
         flash('Please log in to download', 'warning')
         return redirect(url_for('login'))
     
     connect = sqlite3.connect(DATABASE)
     cursor = connect.cursor()
-    cursor.execute('SELECT sheetname, composer, instrument FROM sheets WHERE file_path = ?', (filename,))
+    sheet_id = str(sheet_id)
+    cursor.execute('SELECT file_path, sheetname, composer, instrument FROM sheets WHERE id = ?', (sheet_id,))
     row = cursor.fetchone()
 
     if row:
         username = session['username']
-        sheetname, composer, instrument = row
-        cursor.execute('INSERT INTO favourites (username, filename, sheetname, composer, instrument) VALUES (?, ?, ?, ?, ?)', (username, filename, sheetname, composer, instrument))
+        filename, sheetname, composer, instrument = row
+        cursor.execute('INSERT INTO favourites (sheet_id, username, filename, sheetname, composer, instrument) VALUES (?, ?, ?, ?, ?, ?)', (sheet_id, username, filename, sheetname, composer, instrument))
 
     connect.commit()
     flash('File was added to favourite.', 'success')
     return redirect(url_for('home'))
-
-
-
-@app.route("/")
-def index():
-    sql = "SELECT * FROM Sheets"
-    results = query_db(sql)
-    return render_template('index.html', results=results)
 
 
 @app.route('/add_sheets', methods=['GET','POST'])
