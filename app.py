@@ -225,7 +225,22 @@ def composer():
 
 @app.route('/search')
 def search():
-    return render_template('search.html')
+    query = request.args.get('query', "").strip()
+    results = []
+
+    if query:
+       connect = sqlite3.connect(DATABASE)
+       cursor = connect.cursor()
+       # Fetch search results
+       cursor.execute('''
+            SELECT id, file_path, sheetname, composer, instrument, download_count
+            FROM sheets
+            WHERE sheetname LIKE ? OR composer LIKE ?
+            ORDER BY created_at DESC
+        ''', (f'%{query}%', f'%{query}%',) )
+       results = cursor.fetchall()
+
+    return render_template('search_results.html', query=query, sheets=results)
 
 @app.route('/upload')
 def upload():
