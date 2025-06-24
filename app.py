@@ -215,9 +215,17 @@ def logout():
     flash('You have been logged out', 'warning')
     return render_template('home.html')
 
-@app.route('/sheet')
-def sheet():
-    return render_template('sheet.html')
+@app.route('/sheets')
+def sheets():
+    connect = sqlite3.connect(DATABASE)
+    cursor = connect.cursor()
+    cursor.execute('''
+            SELECT id, file_path, sheetname, composer, instrument, download_count
+            FROM sheets
+            ORDER BY created_at DESC
+        ''', ())
+    results = cursor.fetchall()
+    return render_template('sheets.html', sheets=results)
 
 @app.route('/composer')
 def composer():

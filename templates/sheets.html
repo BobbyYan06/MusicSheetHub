@@ -1,0 +1,54 @@
+<!-- This will inherit layout from parents: base.html -->
+{% extends 'base.html' %}
+
+<!--Home page -->
+{% block content %}
+<header class="bg-light py-5 text-center">
+    <div class="container">
+        <h1 class="display-4">Welcome to MusicSheetHub Site</h1>
+        <p class="lead">Enjoy music every day</p>
+    </div>
+ </header>
+
+ <div class="container px-4 px-md-5">
+    <!-- All Sheets --> 
+    <h3>All Sheets</h3>
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for sheet in sheets %}
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    {% set ext = sheet[1].split('.')[-1].lower() %}
+                    {% if ext in ['jpg', 'jpeg', 'png', 'gif'] %}
+                    <img src="{{ url_for('preview_file', filename=sheet[1]) }}" class="card-img-top" alt="Sheet Thumbnail"
+                        style="height: 200px; object-fit: cover;">
+                    {% elif ext == 'pdf' %}
+                    <embed src="{{ url_for('preview_file', filename=sheet[1]) }}" type="application/pdf" width="100%"
+                        height="200px" />
+                    {% endif %}
+
+                    
+                    <div class="card-body">
+                        <h6 class="card-title text-truncate">{{ sheet[2] }}</h6>
+                        <p class="card-text small">Composer: {{ sheet[3] or "N/A" }}</p>
+                        <p class="card-text small">Downloads: {{ sheet[5] }}</p>
+                        <div class="d-flex justify-content-between mt-3">
+                            <a href="{{ url_for('download_file', sheet_id=sheet[0]) }}" class="btn btn-sm btn-primary">
+                            <i class="bi bi-download"></i>Download
+                            </a>
+
+                            <a href="{{ url_for('favourite_file', sheet_id=sheet[0]) }}" class="btn btn-sm btn-primary">
+                            <i class="bi bi-download"></i>Favourite
+                            </a>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        {% endfor %}
+    </div>
+     
+</div>
+{% endblock %}
