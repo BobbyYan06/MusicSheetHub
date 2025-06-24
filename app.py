@@ -54,7 +54,7 @@ def home():
     top_download = cursor.fetchall()
 
     # Top 12 uploaded sheets
-    cursor.execute('''SELECT id, file_path, sheetname, composer, Instrument, download_count FROM sheets ORDER BY
+    cursor.execute('''SELECT id, file_path, sheetname, composer, Instrument, created_at FROM sheets ORDER BY
                    created_at DESC LIMIT 12'''
     )
     latest_uploaded = cursor.fetchall()

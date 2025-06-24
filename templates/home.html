@@ -71,7 +71,7 @@
                     <div class="card-body">
                         <h6 class="card-title text-truncate">{{ sheet[2] }}</h6>
                         <p class="card-text small">Composer: {{ sheet[3] or "N/A" }}</p>
-                        <p class="card-text small">Downloads: {{ sheet[5] }}</p>
+                        <p class="card-text small">Uploaded: {{ sheet[5] }}</p>
                         <div class="d-flex justify-content-between mt-3">
                             <a href="{{ url_for('download_file', sheet_id=sheet[0]) }}" class="btn btn-sm btn-primary">
                             <i class="bi bi-download"></i>Download
