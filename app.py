@@ -322,6 +322,18 @@ def add_sheets():
 def preview_file(filename):
     return send_from_directory(app.config['UPLOAD_FILES'], filename, as_attachment=False)
 
+@app.route('/sheet/<int:sheet_id>')
+def sheet_detail(sheet_id):
+    connect = sqlite3.connect(DATABASE)
+    cursor = connect.cursor()
+    cursor.execute('SELECT id, file_path, sheetname, composer, instrument, download_count FROM sheets WHERE id = ?', (sheet_id,))
+    sheet = cursor.fetchone()
+
+    if not sheet:
+        flash("Sheet not found.", "danger")
+        return redirect(url_for('home'))
+
+    return render_template('sheet_detail.html', sheet=sheet)
 
 # this is the app with debug on
 if __name__ == "__main__":
