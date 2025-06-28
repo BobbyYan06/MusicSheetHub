@@ -333,14 +333,26 @@ def sheet_detail(sheet_id):
         flash("Sheet not found.", "danger")
         return redirect(url_for('home'))
     
-    # Handle new comment
+    # Handle form submissions
     if request.method == 'POST' and 'username' in session:
-        comment = request.form.get('comment')
         cursor.execute('SELECT id FROM users WHERE username = ?', (session['username'],))
         user_id = cursor.fetchone()[0]
-        cursor.execute("INSERT INTO comments (user_id, sheet_id, comment) VALUES (?, ?, ?)", (user_id, sheet_id, comment))
-        connect.commit()
 
+        form_type = request.form.get('form_type')
+        if form_type == 'rating':
+            rating = int(request.form.get('rating'))
+            if 1 <= rating <= 5:
+                # Insert or update user rating
+                cursor.execute('''
+                    INSERT INTO ratings (sheet_id, user_id, rating)
+                    VALUES (?, ?, ?)
+                    ON CONFLICT(sheet_id, user_id) DO UPDATE SET rating = excluded.rating
+                ''', (sheet_id, user_id, rating))
+                connect.commit()
+        else:
+            comment = request.form.get('comment')
+            cursor.execute("INSERT INTO comments (user_id, sheet_id, comment) VALUES (?, ?, ?)", (user_id, sheet_id, comment))
+            connect.commit()
     
     # Load comments
     cursor.execute('''
@@ -350,9 +362,14 @@ def sheet_detail(sheet_id):
         WHERE c.sheet_id = ? 
         ORDER BY c.created_at DESC
     ''', (sheet_id,))
-    comments = cursor.fetchall()    
+    comments = cursor.fetchall()
 
-    return render_template('sheet_detail.html', sheet=sheet, comments=comments)
+    # Load user rating
+    cursor.execute('SELECT AVG(rating), COUNT(*) FROM ratings WHERE sheet_id = ?', (sheet_id,))
+    avg_rating, rating_count = cursor.fetchone()
+    avg_rating = round(avg_rating, 1) if avg_rating else None
+    
+    return render_template('sheet_detail.html', sheet=sheet, comments=comments, avg_rating=avg_rating)
 
 # this is the app with debug on
 if __name__ == "__main__":

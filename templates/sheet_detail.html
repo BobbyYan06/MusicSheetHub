@@ -29,7 +29,7 @@
 
             <!-- Rating Section -->
             <div class="mt-4">
-                <h4>Rate this Sheet</h4>
+                <h5>Please rate this Sheet</h5>
                 {% if session.username %}
                 <form method="POST" action="{{ url_for('sheet_detail', sheet_id=sheet[0]) }}">
                     <input type="hidden" name="form_type" value="rating">
@@ -58,7 +58,7 @@
 
             <!-- Comments Section -->
             <div class="mt-5">
-                <h4>Comments</h4>
+                <h5>Comments</h5>
 
                 {% if session.username %}
                 <form method="POST" action="{{ url_for('sheet_detail', sheet_id=sheet[0]) }}">
