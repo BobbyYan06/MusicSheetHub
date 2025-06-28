@@ -16,7 +16,9 @@
 
                     
                     <div class="card-body">
-                        <h6 class="card-title text-truncate">{{ sheet[2] }}</h6>
+                        <a href="{{ url_for('sheet_detail', sheet_id=sheet[0]) }}">
+                            <h6 class="card-title text-truncate">{{ sheet[2] }}</h6>
+                        </a>
                         <p class="card-text small">Composer: {{ sheet[3] or "N/A" }}</p>
                         <p class="card-text small">Instrument: {{ sheet[4] }}</p>
 
