@@ -318,11 +318,11 @@ def add_sheets():
     return redirect('/')
 
 # Preview file in browser
-@app.route('/preview/<filename>')
+@app.route('/preview/<filename>', methods=['GET','POST'])
 def preview_file(filename):
     return send_from_directory(app.config['UPLOAD_FILES'], filename, as_attachment=False)
 
-@app.route('/sheet/<int:sheet_id>')
+@app.route('/sheet/<int:sheet_id>',methods=['GET','POST'])
 def sheet_detail(sheet_id):
     connect = sqlite3.connect(DATABASE)
     cursor = connect.cursor()
@@ -332,8 +332,27 @@ def sheet_detail(sheet_id):
     if not sheet:
         flash("Sheet not found.", "danger")
         return redirect(url_for('home'))
+    
+    # Handle new comment
+    if request.method == 'POST' and 'username' in session:
+        comment = request.form.get('comment')
+        cursor.execute('SELECT id FROM users WHERE username = ?', (session['username'],))
+        user_id = cursor.fetchone()[0]
+        cursor.execute("INSERT INTO comments (user_id, sheet_id, comment) VALUES (?, ?, ?)", (user_id, sheet_id, comment))
+        connect.commit()
 
-    return render_template('sheet_detail.html', sheet=sheet)
+    
+    # Load comments
+    cursor.execute('''
+        SELECT u.username, c.comment, c.created_at 
+        FROM comments c 
+        JOIN users u ON c.user_id = u.id 
+        WHERE c.sheet_id = ? 
+        ORDER BY c.created_at DESC
+    ''', (sheet_id,))
+    comments = cursor.fetchall()    
+
+    return render_template('sheet_detail.html', sheet=sheet, comments=comments)
 
 # this is the app with debug on
 if __name__ == "__main__":

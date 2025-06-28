@@ -32,7 +32,7 @@
                 <h4>Comments</h4>
 
                 {% if session.username %}
-                <form method="POST">
+                <form method="POST" action="{{ url_for('sheet_detail', sheet_id=sheet[0]) }}">
                     <div class="mb-3">
                         <textarea name="comment" class="form-control" rows="3" placeholder="Write your comment..." required></textarea>
                     </div>
