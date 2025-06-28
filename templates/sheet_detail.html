@@ -27,6 +27,35 @@
                 <i class="bi bi-heart"></i> Favourite
             </a>
 
+            <!-- Rating Section -->
+            <div class="mt-4">
+                <h4>Rate this Sheet</h4>
+                {% if session.username %}
+                <form method="POST" action="{{ url_for('sheet_detail', sheet_id=sheet[0]) }}">
+                    <input type="hidden" name="form_type" value="rating">
+                    <div class="mb-2">
+                        <label for="rating" class="form-label">Your Rating (1–5):</label>
+                        <select name="rating" id="rating" class="form-select w-auto d-inline" required>
+                            <option value="">--</option>
+                            {% for i in range(1,6) %}
+                            <option value="{{ i }}">{{ i }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-primary">Submit</button>
+                    </div>
+                </form>
+                {% else %}
+                <p><a href="{{ url_for('login') }}">Log in</a> to rate this sheet.</p>
+                {% endif %}
+
+                {% if avg_rating %}
+                <p class="text-muted">Average Rating: {{ "%.1f"|format(avg_rating) }} / 5 ({{ rating_count }} rating{{ 's' if rating_count != 1 else '' }})</p>
+                {% else %}
+                <p class="text-muted">No ratings yet.</p>
+                {% endif %}
+            </div>
+
+
             <!-- Comments Section -->
             <div class="mt-5">
                 <h4>Comments</h4>
