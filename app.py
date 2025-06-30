@@ -213,7 +213,7 @@ def profile():
 def logout():
     session.pop('username', None)
     flash('You have been logged out', 'warning')
-    return render_template('home.html')
+    return redirect(url_for('login'))
 
 @app.route('/sheets')
 def sheets():
