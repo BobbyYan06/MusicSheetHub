@@ -48,13 +48,13 @@ def home():
     connect = sqlite3.connect(DATABASE)
     cursor = connect.cursor()
     # Top 12 download sheets
-    cursor.execute('''SELECT id, file_path, sheetname, composer, Instrument, download_count FROM sheets ORDER BY
+    cursor.execute('''SELECT id, filename, sheetname, composer, Instrument, download_count FROM sheets ORDER BY
                    download_count DESC LIMIT 12'''
     )
     top_download = cursor.fetchall()
 
     # Top 12 uploaded sheets
-    cursor.execute('''SELECT id, file_path, sheetname, composer, Instrument, created_at FROM sheets ORDER BY
+    cursor.execute('''SELECT id, filename, sheetname, composer, Instrument, created_at FROM sheets ORDER BY
                    created_at DESC LIMIT 12'''
     )
     latest_uploaded = cursor.fetchall()
@@ -163,7 +163,7 @@ def profile():
                 filepath = os.path.join(app.config['UPLOAD_FILES'], filename)
                 file.save(filepath)
 
-                cursor.execute("INSERT INTO sheets (sheetname, file_path, composer, instrument, uploader_id) VALUES (?, ?, ?, ?,?)", 
+                cursor.execute("INSERT INTO sheets (sheetname, filename, composer, instrument, uploader_id) VALUES (?, ?, ?, ?,?)", 
                                (sheetname, filename, composer, instrument, user_id))
                 connect.commit()
                 flash('Sheet uploaded successfully.', 'success')
@@ -180,7 +180,7 @@ def profile():
     # Load user sheets if viewing sheets tab
     sheets = []
     if active_tab == 'sheets':
-        cursor.execute("SELECT id, file_path, sheetname, composer, instrument, created_at FROM sheets WHERE uploader_id = ? ORDER BY created_at DESC", (user_id, ))
+        cursor.execute("SELECT id, filename, sheetname, composer, instrument, created_at FROM sheets WHERE uploader_id = ? ORDER BY created_at DESC", (user_id, ))
         sheets = cursor.fetchall()
     
     # Load user downloads if viewing downloads tab
@@ -220,7 +220,7 @@ def sheets():
     connect = sqlite3.connect(DATABASE)
     cursor = connect.cursor()
     cursor.execute('''
-            SELECT id, file_path, sheetname, composer, instrument, download_count
+            SELECT id, filename, sheetname, composer, instrument, download_count
             FROM sheets
             ORDER BY created_at DESC
         ''', ())
@@ -241,7 +241,7 @@ def search():
        cursor = connect.cursor()
        # Fetch search results
        cursor.execute('''
-            SELECT id, file_path, sheetname, composer, instrument, download_count
+            SELECT id, filename, sheetname, composer, instrument, download_count
             FROM sheets
             WHERE sheetname LIKE ? OR composer LIKE ?
             ORDER BY created_at DESC
@@ -266,7 +266,7 @@ def download_file(sheet_id):
     cursor.execute("UPDATE Sheets SET download_count = download_count + 1 WHERE id = ?", (sheet_id,))
 
     # Fetch sheet details
-    cursor.execute("SELECT file_path, sheetname, composer, instrument FROM sheets WHERE id = ?", (sheet_id,))
+    cursor.execute("SELECT filename, sheetname, composer, instrument FROM sheets WHERE id = ?", (sheet_id,))
     row = cursor.fetchone()
 
     if row:
@@ -288,7 +288,7 @@ def favourite_file(sheet_id):
     connect = sqlite3.connect(DATABASE)
     cursor = connect.cursor()
     sheet_id = str(sheet_id)
-    cursor.execute('SELECT file_path, sheetname, composer, instrument FROM sheets WHERE id = ?', (sheet_id,))
+    cursor.execute('SELECT filename, sheetname, composer, instrument FROM sheets WHERE id = ?', (sheet_id,))
     row = cursor.fetchone()
 
     if row:
@@ -307,13 +307,13 @@ def add_sheets():
     sheetname = request.form['sheetname']
     composer = request.form['composer']
     instrument = request.form['instrument']
-    file_path = request.form['file_path']
+    filename = request.form['filename']
     uploader_id = request.form['uploader_id']
     download_count = request.form['download_count']
     # create a query to insert the data
-    sql = "INSERT INTO sheets (sheetname, composer, instrument, file_path, uploader_id, download_count) VALUES (?, ?, ?, ?, ?, ?);"
+    sql = "INSERT INTO sheets (sheetname, composer, instrument, filename, uploader_id, download_count) VALUES (?, ?, ?, ?, ?, ?);"
     # execute the query
-    query_db(sql, args=(sheetname, composer, instrument, file_path, uploader_id, download_count))
+    query_db(sql, args=(sheetname, composer, instrument, filename, uploader_id, download_count))
     # redirect back to the home page
     return redirect('/')
 
@@ -326,7 +326,7 @@ def preview_file(filename):
 def sheet_detail(sheet_id):
     connect = sqlite3.connect(DATABASE)
     cursor = connect.cursor()
-    cursor.execute('SELECT id, file_path, sheetname, composer, instrument, download_count FROM sheets WHERE id = ?', (sheet_id,))
+    cursor.execute('SELECT id, filename, sheetname, composer, instrument, download_count FROM sheets WHERE id = ?', (sheet_id,))
     sheet = cursor.fetchone()
 
     if not sheet:
