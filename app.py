@@ -122,7 +122,8 @@ def profile():
     cursor = connect.cursor()
 
     cursor.execute("SELECT id FROM users WHERE username=?", (username, ))
-    user_id = str(cursor.fetchone())
+    # user_id = str(cursor.fetchone()[0])
+    user_id = cursor.fetchone()[0]
 
     if request.method == 'POST':
         form_type = request.form.get('form_type')
@@ -370,6 +371,46 @@ def sheet_detail(sheet_id):
     avg_rating = round(avg_rating, 1) if avg_rating else None
     
     return render_template('sheet_detail.html', sheet=sheet, comments=comments, avg_rating=avg_rating)
+
+@app.route('/edit/<int:sheet_id>', methods=['GET', 'POST'])
+def edit_sheet(sheet_id):
+    if 'username' not in session:
+        flash("You must be logged in to edit a sheet.", "warning")
+        return redirect(url_for('login'))
+
+    connect = sqlite3.connect(DATABASE)
+    cursor = connect.cursor()
+
+    # Get the sheet
+    cursor.execute("SELECT id, sheetname, composer, instrument, uploader_id FROM sheets WHERE id = ?", (sheet_id,))
+    sheet = cursor.fetchone()
+
+    if not sheet:
+        flash("Sheet not found.", "danger")
+        return redirect(url_for('profile', tab='sheets'))
+
+    # Make sure the user owns the sheet
+    cursor.execute("SELECT id FROM users WHERE username = ?", (session['username'],))
+    user_id = cursor.fetchone()[0]
+    if sheet[4] != user_id:
+        flash("You do not have permission to edit this sheet.", "danger")
+        return redirect(url_for('profile', tab='sheets'))
+
+    if request.method == 'POST':
+        sheetname = request.form.get('sheetname')
+        composer = request.form.get('composer')
+        instrument = request.form.get('instrument')
+
+        cursor.execute('''
+            UPDATE sheets
+            SET sheetname = ?, composer = ?, instrument = ?
+            WHERE id = ?
+        ''', (sheetname, composer, instrument, sheet_id))
+        connect.commit()
+        flash("Sheet updated successfully!", "success")
+        return redirect(url_for('profile', tab='sheets'))
+
+    return render_template('edit_sheet.html', sheet=sheet)
 
 # this is the app with debug on
 if __name__ == "__main__":
