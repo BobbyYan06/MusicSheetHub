@@ -412,6 +412,45 @@ def edit_sheet(sheet_id):
 
     return render_template('edit_sheet.html', sheet=sheet)
 
+@app.route('/delete/<int:sheet_id>', methods=['POST'])
+def delete_sheet(sheet_id):
+    if 'username' not in session:
+        flash("You must be logged in to delete a sheet.", "warning")
+        return redirect(url_for('login'))
+
+    connect = sqlite3.connect(DATABASE)
+    cursor = connect.cursor()
+
+    # Get sheet and verify ownership
+    cursor.execute("SELECT filename, uploader_id FROM sheets WHERE id = ?", (sheet_id,))
+    row = cursor.fetchone()
+
+    if not row:
+        flash("Sheet not found.", "danger")
+        return redirect(url_for('profile', tab='sheets'))
+
+    filename, uploader_id = row
+
+    cursor.execute("SELECT id FROM users WHERE username = ?", (session['username'],))
+    user_id = cursor.fetchone()[0]
+
+    if uploader_id != user_id:
+        flash("You do not have permission to delete this sheet.", "danger")
+        return redirect(url_for('profile', tab='sheets'))
+
+    # Delete file from folder
+    file_path = os.path.join(app.config['UPLOAD_FILES'], filename)
+    if os.path.exists(file_path):
+        os.remove(file_path)
+
+    # Delete from database
+    cursor.execute("DELETE FROM sheets WHERE id = ?", (sheet_id,))
+    connect.commit()
+
+    flash("Sheet deleted successfully!", "success")
+    return redirect(url_for('profile', tab='sheets'))
+
+
 # this is the app with debug on
 if __name__ == "__main__":
     app.run(debug=True)
