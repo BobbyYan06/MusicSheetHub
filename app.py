@@ -450,6 +450,28 @@ def delete_sheet(sheet_id):
     flash("Sheet deleted successfully!", "success")
     return redirect(url_for('profile', tab='sheets'))
 
+@app.route('/delete_download/<int:download_id>', methods=['POST'])
+def delete_download(download_id):
+    if 'username' not in session:
+        flash("You must be logged in to delete a download.", "warning")
+        return redirect(url_for('login'))
+
+    connect = sqlite3.connect(DATABASE)
+    cursor = connect.cursor()
+
+    # Ensure the download belongs to the user
+    cursor.execute("SELECT username FROM downloads WHERE id = ?", (download_id,))
+    row = cursor.fetchone()
+
+    if not row or row[0] != session['username']:
+        flash("You do not have permission to delete this download.", "danger")
+        return redirect(url_for('profile', tab='downloads'))
+
+    cursor.execute("DELETE FROM downloads WHERE id = ?", (download_id,))
+    connect.commit()
+
+    flash("Download record deleted successfully!", "success")
+    return redirect(url_for('profile', tab='downloads'))
 
 # this is the app with debug on
 if __name__ == "__main__":
