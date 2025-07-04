@@ -473,6 +473,29 @@ def delete_download(download_id):
     flash("Download record deleted successfully!", "success")
     return redirect(url_for('profile', tab='downloads'))
 
+@app.route('/delete_favourite/<int:favourite_id>', methods=['POST'])
+def delete_favourite(favourite_id):
+    if 'username' not in session:
+        flash("You must be logged in to delete a favourite.", "warning")
+        return redirect(url_for('login'))
+
+    connect = sqlite3.connect(DATABASE)
+    cursor = connect.cursor()
+
+    cursor.execute("SELECT username FROM favourites WHERE id = ?", (favourite_id,))
+    row = cursor.fetchone()
+
+    if not row or row[0] != session['username']:
+        flash("You do not have permission to delete this favourite.", "danger")
+        return redirect(url_for('profile', tab='favourites'))
+
+    cursor.execute("DELETE FROM favourites WHERE id = ?", (favourite_id,))
+    connect.commit()
+    connect.close()
+
+    flash("Favourite removed successfully!", "success")
+    return redirect(url_for('profile', tab='favourites'))
+
 # this is the app with debug on
 if __name__ == "__main__":
     app.run(debug=True)
