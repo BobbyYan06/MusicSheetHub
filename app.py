@@ -218,15 +218,28 @@ def logout():
 
 @app.route('/sheets')
 def sheets():
+    page = request.args.get('page', 1, type=int)
+    per_page = 12
+    offset = (page - 1) * per_page
+
     connect = sqlite3.connect(DATABASE)
     cursor = connect.cursor()
+
+    # Fetch paginated sheets
     cursor.execute('''
-            SELECT id, filename, sheetname, composer, instrument, download_count
-            FROM sheets
-            ORDER BY created_at DESC
-        ''', ())
+        SELECT id, filename, sheetname, composer, instrument, download_count
+        FROM sheets
+        ORDER BY created_at DESC
+        LIMIT ? OFFSET ?
+    ''', (per_page, offset))
     results = cursor.fetchall()
-    return render_template('sheets.html', sheets=results)
+
+    # Fetch total number of sheets for pagination
+    cursor.execute('SELECT COUNT(*) FROM sheets')
+    total_sheets = cursor.fetchone()[0]
+    total_pages = (total_sheets + per_page - 1) // per_page
+
+    return render_template('sheets.html', sheets=results, page=page, total_pages=total_pages)
 
 @app.route('/composer')
 def composer():
