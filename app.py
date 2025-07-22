@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, request, flash, redirect, url_for, session, send_from_directory
+from flask import Flask, render_template, redirect, request, flash, redirect, url_for, session, send_from_directory, g
 import sqlite3
 import os
 from werkzeug.utils import secure_filename
@@ -7,6 +7,18 @@ app = Flask(__name__)
 app.secret_key = 'Bobby'
 #path and filename for the database
 DATABASE = "musicsheethub.db"
+
+def get_db():
+    db = getattr(g, '_database', None)
+    if db is None:
+        db = g._database = sqlite3.connect(DATABASE)
+    return db
+
+@app.teardown_appcontext
+def close_connection(exception):
+    db = getattr(g, '_database', None)
+    if db is not None:
+        db.close()
 
 # Configurations for file uploads
 UPLOAD_FILES = 'static/files'
@@ -20,33 +32,12 @@ app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# function to automatically connect and query
-def query_db(sql, args=(), one=False):
-    '''connect and query-will return one item if one=true and can accept arguments as tuple'''
-    # Connect to the database file
-    db = sqlite3.connect(DATABASE)
-    # create the cursor
-    cursor = db.cursor()
-    # excute the query
-    cursor.execute(sql, args)
-    # fetch all the results of the query
-    results = cursor.fetchall()
-    # save the data
-    db.commit()
-    # close the database
-    db.close()
-    # return None if there is no result from the query
-    # return the first item only if one=True
-    # return the list of tuples if one=False
-    return(results[0] if results else None) if one else results
-
-
 #route go here
 @app.route("/")
 @app.route("/home")
 def home():
-    connect = sqlite3.connect(DATABASE)
-    cursor = connect.cursor()
+    db=get_db()
+    cursor = db.cursor()
     # Top 12 download sheets
     cursor.execute('''SELECT id, filename, sheetname, composer, Instrument, download_count FROM sheets ORDER BY
                    download_count DESC LIMIT 12'''
@@ -74,15 +65,13 @@ def signup():
             return redirect(url_for('signup'))
         
         try:
-            connect = sqlite3.connect(DATABASE)
-            cursor = connect.cursor()
+            db=get_db()
+            cursor = db.cursor()
             cursor.execute('INSERT INTO users (username, email, password) VALUES (?, ?, ?)', (username, email, password))
-            connect.commit()
+            db.commit()
             flash('Account created!Please log in.', 'success')
         except sqlite3.IntegrityError:
             flash('Username already exists.', 'danger')
-        finally:
-            connect.close()
 
         return redirect(url_for('login'))
     
@@ -98,8 +87,8 @@ def login():
         username = request.form.get('username')
         password = request.form.get('password')
         
-        connect = sqlite3.connect(DATABASE)
-        cursor = connect.cursor()
+        db=get_db()
+        cursor = db.cursor()
         cursor.execute('SELECT password from Users where username = ?', (username, ))
         row = cursor.fetchone()
 
@@ -118,8 +107,8 @@ def profile():
     active_tab = request.args.get('tab', 'account')
     username = session['username']
 
-    connect = sqlite3.connect(DATABASE)
-    cursor = connect.cursor()
+    db=get_db()
+    cursor = db.cursor()
 
     cursor.execute("SELECT id FROM users WHERE username=?", (username, ))
     # user_id = str(cursor.fetchone()[0])
@@ -148,7 +137,7 @@ def profile():
                 flash("New passwords do not match.", "danger")
             else:
                 cursor.execute("Update users SET password = ? WHERE username = ?", (new_password, username))
-                connect.commit()
+                db.commit()
                 flash("Password updated successfully.", "success")
 
             return redirect(url_for('profile', tab='account'))
@@ -166,7 +155,7 @@ def profile():
 
                 cursor.execute("INSERT INTO sheets (sheetname, filename, composer, instrument, uploader_id) VALUES (?, ?, ?, ?,?)", 
                                (sheetname, filename, composer, instrument, user_id))
-                connect.commit()
+                db.commit()
                 flash('Sheet uploaded successfully.', 'success')
             else:
                 flash('Invalid file type.', 'danger')
@@ -222,8 +211,8 @@ def sheets():
     per_page = 12
     offset = (page - 1) * per_page
 
-    connect = sqlite3.connect(DATABASE)
-    cursor = connect.cursor()
+    db=get_db()
+    cursor = db.cursor()
 
     # Fetch paginated sheets
     cursor.execute('''
@@ -251,8 +240,8 @@ def search():
     results = []
 
     if query:
-       connect = sqlite3.connect(DATABASE)
-       cursor = connect.cursor()
+       db=get_db()
+       cursor = db.cursor()
        # Fetch search results
        cursor.execute('''
             SELECT id, filename, sheetname, composer, instrument, download_count
@@ -274,8 +263,8 @@ def download_file(sheet_id):
         flash('Please log in to download', 'warning')
         return redirect(url_for('login'))
     
-    connect = sqlite3.connect(DATABASE)
-    cursor = connect.cursor()
+    db=get_db()
+    cursor = db.cursor()
     sheet_id = str(sheet_id)
     cursor.execute("UPDATE Sheets SET download_count = download_count + 1 WHERE id = ?", (sheet_id,))
 
@@ -289,7 +278,7 @@ def download_file(sheet_id):
         # Log donwload
         cursor.execute('''INSERT INTO downloads (sheet_id, username, filename, sheetname, composer, instrument) VALUES (?, ?, ?, ?, ?, ?)''', (sheet_id, username, filename, sheetname, composer, instrument))
     
-    connect.commit()
+    db.commit()
     return send_from_directory(app.config['UPLOAD_FILES'], filename, as_attachment=True)
 
 # favourite file
@@ -299,8 +288,8 @@ def favourite_file(sheet_id):
         flash('Please log in to download', 'warning')
         return redirect(url_for('login'))
     
-    connect = sqlite3.connect(DATABASE)
-    cursor = connect.cursor()
+    db=get_db()
+    cursor = db.cursor()
     sheet_id = str(sheet_id)
     cursor.execute('SELECT filename, sheetname, composer, instrument FROM sheets WHERE id = ?', (sheet_id,))
     row = cursor.fetchone()
@@ -310,7 +299,7 @@ def favourite_file(sheet_id):
         filename, sheetname, composer, instrument = row
         cursor.execute('INSERT INTO favourites (sheet_id, username, filename, sheetname, composer, instrument) VALUES (?, ?, ?, ?, ?, ?)', (sheet_id, username, filename, sheetname, composer, instrument))
 
-    connect.commit()
+    db.commit()
     flash('File was added to favourite.', 'success')
     return redirect(url_for('home'))
 
@@ -338,8 +327,8 @@ def preview_file(filename):
 
 @app.route('/sheet/<int:sheet_id>',methods=['GET','POST'])
 def sheet_detail(sheet_id):
-    connect = sqlite3.connect(DATABASE)
-    cursor = connect.cursor()
+    db=get_db()
+    cursor = db.cursor()
     cursor.execute('SELECT id, filename, sheetname, composer, instrument, download_count FROM sheets WHERE id = ?', (sheet_id,))
     sheet = cursor.fetchone()
 
@@ -362,11 +351,11 @@ def sheet_detail(sheet_id):
                     VALUES (?, ?, ?)
                     ON CONFLICT(sheet_id, user_id) DO UPDATE SET rating = excluded.rating
                 ''', (sheet_id, user_id, rating))
-                connect.commit()
+                db.commit()
         else:
             comment = request.form.get('comment')
             cursor.execute("INSERT INTO comments (user_id, sheet_id, comment) VALUES (?, ?, ?)", (user_id, sheet_id, comment))
-            connect.commit()
+            db.commit()
     
     # Load comments
     cursor.execute('''
@@ -391,8 +380,8 @@ def edit_sheet(sheet_id):
         flash("You must be logged in to edit a sheet.", "warning")
         return redirect(url_for('login'))
 
-    connect = sqlite3.connect(DATABASE)
-    cursor = connect.cursor()
+    db=get_db()
+    cursor = db.cursor()
 
     # Get the sheet
     cursor.execute("SELECT id, sheetname, composer, instrument, uploader_id FROM sheets WHERE id = ?", (sheet_id,))
@@ -419,7 +408,7 @@ def edit_sheet(sheet_id):
             SET sheetname = ?, composer = ?, instrument = ?
             WHERE id = ?
         ''', (sheetname, composer, instrument, sheet_id))
-        connect.commit()
+        db.commit()
         flash("Sheet updated successfully!", "success")
         return redirect(url_for('profile', tab='sheets'))
 
@@ -431,8 +420,8 @@ def delete_sheet(sheet_id):
         flash("You must be logged in to delete a sheet.", "warning")
         return redirect(url_for('login'))
 
-    connect = sqlite3.connect(DATABASE)
-    cursor = connect.cursor()
+    db=get_db()
+    cursor = db.cursor()
 
     # Get sheet and verify ownership
     cursor.execute("SELECT filename, uploader_id FROM sheets WHERE id = ?", (sheet_id,))
@@ -458,7 +447,7 @@ def delete_sheet(sheet_id):
 
     # Delete from database
     cursor.execute("DELETE FROM sheets WHERE id = ?", (sheet_id,))
-    connect.commit()
+    db.commit()
 
     flash("Sheet deleted successfully!", "success")
     return redirect(url_for('profile', tab='sheets'))
@@ -469,8 +458,8 @@ def delete_download(download_id):
         flash("You must be logged in to delete a download.", "warning")
         return redirect(url_for('login'))
 
-    connect = sqlite3.connect(DATABASE)
-    cursor = connect.cursor()
+    db=get_db()
+    cursor = db.cursor()
 
     # Ensure the download belongs to the user
     cursor.execute("SELECT username FROM downloads WHERE id = ?", (download_id,))
@@ -481,7 +470,7 @@ def delete_download(download_id):
         return redirect(url_for('profile', tab='downloads'))
 
     cursor.execute("DELETE FROM downloads WHERE id = ?", (download_id,))
-    connect.commit()
+    db.commit()
 
     flash("Download record deleted successfully!", "success")
     return redirect(url_for('profile', tab='downloads'))
@@ -492,8 +481,8 @@ def delete_favourite(favourite_id):
         flash("You must be logged in to delete a favourite.", "warning")
         return redirect(url_for('login'))
 
-    connect = sqlite3.connect(DATABASE)
-    cursor = connect.cursor()
+    db=get_db()
+    cursor = db.cursor()
 
     cursor.execute("SELECT username FROM favourites WHERE id = ?", (favourite_id,))
     row = cursor.fetchone()
@@ -503,8 +492,8 @@ def delete_favourite(favourite_id):
         return redirect(url_for('profile', tab='favourites'))
 
     cursor.execute("DELETE FROM favourites WHERE id = ?", (favourite_id,))
-    connect.commit()
-    connect.close()
+    db.commit()
+    
 
     flash("Favourite removed successfully!", "success")
     return redirect(url_for('profile', tab='favourites'))
