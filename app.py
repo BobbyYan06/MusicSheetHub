@@ -316,7 +316,9 @@ def add_sheets():
     # create a query to insert the data
     sql = "INSERT INTO sheets (sheetname, composer, instrument, filename, uploader_id, download_count) VALUES (?, ?, ?, ?, ?, ?);"
     # execute the query
-    query_db(sql, args=(sheetname, composer, instrument, filename, uploader_id, download_count))
+    db=get_db()
+    cursor = db.cursor()
+    cursor.execute(sql, (sheetname, composer, instrument, filename, uploader_id, download_count))
     # redirect back to the home page
     return redirect('/')
 
