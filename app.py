@@ -265,7 +265,6 @@ def download_file(sheet_id):
     
     db=get_db()
     cursor = db.cursor()
-    sheet_id = str(sheet_id)
     cursor.execute("UPDATE Sheets SET download_count = download_count + 1 WHERE id = ?", (sheet_id,))
 
     # Fetch sheet details
