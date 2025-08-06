@@ -25,12 +25,13 @@
     <div class="mb-3">
         <label for="genre" class="form-label">Genre:</label>
         <select class="form-select" id="genre" name="genre" required>
-            <option value="" selected disabled>Select a genre</option>
+            <option value="" disabled selected>Select genre</option>
             {% for genre in genres %}
-                <option value="{{ genre.id }}">{{ genre.name }}</option>
+                <option value="{{ genre[0] }}">{{ genre[1] }}</option>
             {% endfor %}
         </select>
     </div>
+
 
 
 

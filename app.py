@@ -114,6 +114,10 @@ def profile():
     # user_id = str(cursor.fetchone()[0])
     user_id = cursor.fetchone()[0]
 
+    # Fetch genres to populate the dropdown
+    cursor.execute("SELECT id, name FROM Genres")
+    genres = cursor.fetchall()
+
     if request.method == 'POST':
         form_type = request.form.get('form_type')
         if form_type == 'profile_update':
@@ -195,8 +199,8 @@ def profile():
         """, (username,))
         favourites = cursor.fetchall()
         
-
-    return render_template('profile.html', tab=active_tab, username=username, email=email, sheets=sheets, downloads=downloads, favourites=favourites)
+    print("Genres loaded:", genres)
+    return render_template('profile.html', tab=active_tab, username=username, email=email, sheets=sheets, downloads=downloads, favourites=favourites, genres=genres)
 
 
 @app.route('/logout')
