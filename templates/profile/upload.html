@@ -22,5 +22,17 @@
         <input type="text" class="form-control" id="instrument" name="instrument" required>
     </div>
 
+    <div class="mb-3">
+        <label for="genre" class="form-label">Genre:</label>
+        <select class="form-select" id="genre" name="genre" required>
+            <option value="" selected disabled>Select a genre</option>
+            {% for genre in genres %}
+                <option value="{{ genre.id }}">{{ genre.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+
+
     <button type="submit" class="btn btn-primary">Upload</button>
 </form>
