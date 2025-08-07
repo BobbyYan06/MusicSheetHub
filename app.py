@@ -151,6 +151,8 @@ def profile():
             sheetname = request.form.get('sheetname')
             composer = request.form.get('composer')
             instrument = request.form.get('instrument')
+            # Get selected genre from the form
+            genre_id = request.form.get("genre")
 
             if file and allowed_file(file.filename):
                 filename = f"{username}_{secure_filename(file.filename)}"
@@ -159,6 +161,14 @@ def profile():
 
                 cursor.execute("INSERT INTO sheets (sheetname, filename, composer, instrument, uploader_id) VALUES (?, ?, ?, ?,?)", 
                                (sheetname, filename, composer, instrument, user_id))
+                
+                sheet_id = cursor.lastrowid
+                # Insert into SheetGenres
+                if genre_id:
+                    cursor.execute('''
+                        INSERT INTO SheetGenres (sid, gid) VALUES (?, ?)
+                    ''', (sheet_id, genre_id))
+                    
                 db.commit()
                 flash('Sheet uploaded successfully.', 'success')
             else:
