@@ -16,7 +16,7 @@ Check out newly added content in the **Latest Uploaded Sheets** section on the H
 View all available music sheets on the **Sheets** page. The page displays 12 sheets per page with Previous and Next buttons for easy navigation.
 
 ### Search  
-Use the search bar to find sheet music by instrument, genre, or composer quickly and efficiently.
+Use the search bar to find sheet music by sheet name, or composer name quickly and efficiently.
 
 ### Preview Before You Download or Favourite  
 View sheet previews (image or PDF) to see what you’re getting.

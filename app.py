@@ -421,21 +421,37 @@ def edit_sheet(sheet_id):
         flash("You do not have permission to edit this sheet.", "danger")
         return redirect(url_for('profile', tab='sheets'))
 
+    # Fetch genres for dropdown
+    cursor.execute("SELECT id, name FROM Genres")
+    genres = cursor.fetchall()
+
+    # Get current genre (if any)
+    cursor.execute("SELECT gid FROM SheetGenres WHERE sid = ?", (sheet_id,))
+    row = cursor.fetchone()
+    current_genre_id = row[0] if row else None
+
     if request.method == 'POST':
         sheetname = request.form.get('sheetname')
         composer = request.form.get('composer')
         instrument = request.form.get('instrument')
+        genre_id = request.form.get('genre')
 
         cursor.execute('''
             UPDATE sheets
             SET sheetname = ?, composer = ?, instrument = ?
             WHERE id = ?
         ''', (sheetname, composer, instrument, sheet_id))
+
+        # Update or insert genre
+        cursor.execute("DELETE FROM SheetGenres WHERE sid = ?", (sheet_id,))
+        if genre_id:
+            cursor.execute("INSERT INTO SheetGenres (sid, gid) VALUES (?, ?)", (sheet_id, genre_id))
+            
         db.commit()
         flash("Sheet updated successfully!", "success")
         return redirect(url_for('profile', tab='sheets'))
 
-    return render_template('edit_sheet.html', sheet=sheet)
+    return render_template('edit_sheet.html', sheet=sheet, genres=genres, current_genre_id=current_genre_id)
 
 @app.route('/delete/<int:sheet_id>', methods=['POST'])
 def delete_sheet(sheet_id):

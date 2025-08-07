@@ -19,6 +19,17 @@
             <input type="text" name="instrument" class="form-control" value="{{ sheet[3] }}">
         </div>
 
+        <!-- Genre selection -->
+        <div class="mb-3">
+            <label for="genre" class="form-label">Genre</label>
+            <select class="form-select" id="genre" name="genre" required>
+                <option value="">Select genre</option>
+                {% for genre in genres %}
+                    <option value="{{ genre[0] }}" {% if genre[0] == current_genre_id %}selected{% endif %}>{{ genre[1] }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
         <button type="submit" class="btn btn-success">Save Changes</button>
         <a href="{{ url_for('profile', tab='sheets') }}" class="btn btn-secondary">Cancel</a>
     </form>
