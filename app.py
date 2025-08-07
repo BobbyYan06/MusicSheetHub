@@ -168,7 +168,7 @@ def profile():
                     cursor.execute('''
                         INSERT INTO SheetGenres (sid, gid) VALUES (?, ?)
                     ''', (sheet_id, genre_id))
-                    
+
                 db.commit()
                 flash('Sheet uploaded successfully.', 'success')
             else:
@@ -344,7 +344,15 @@ def preview_file(filename):
 def sheet_detail(sheet_id):
     db=get_db()
     cursor = db.cursor()
-    cursor.execute('SELECT id, filename, sheetname, composer, instrument, download_count FROM sheets WHERE id = ?', (sheet_id,))
+    # cursor.execute('SELECT id, filename, sheetname, composer, instrument, download_count FROM sheets WHERE id = ?', (sheet_id,))
+    cursor.execute('''
+            SELECT s.id, s.filename, s.sheetname, s.composer, s.instrument, s.download_count, g.name
+            FROM sheets s
+            LEFT JOIN SheetGenres sg ON s.id = sg.sid
+            LEFT JOIN Genres g ON sg.gid = g.id
+            WHERE s.id = ?
+        ''', (sheet_id,))
+
     sheet = cursor.fetchone()
 
     if not sheet:

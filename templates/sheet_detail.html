@@ -18,6 +18,7 @@
             <h3>{{ sheet[2] }}</h3>
             <p><strong>Composer:</strong> {{ sheet[3] or "N/A" }}</p>
             <p><strong>Instrument:</strong> {{ sheet[4] or "N/A" }}</p>
+            <p><strong>Genre:</strong> {{ sheet[6] or "N/A" }}</p>
             <p><strong>Downloads:</strong> {{ sheet[5] }}</p>
 
             <a href="{{ url_for('download_file', sheet_id=sheet[0]) }}" class="btn btn-primary mb-2">
