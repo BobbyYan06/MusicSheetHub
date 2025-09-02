@@ -5,14 +5,17 @@ from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.secret_key = 'Bobby'
-#path and filename for the database
+#
+# path and filename for the database
 DATABASE = "musicsheethub.db"
+
 
 def get_db():
     db = getattr(g, '_database', None)
     if db is None:
         db = g._database = sqlite3.connect(DATABASE)
     return db
+
 
 @app.teardown_appcontext
 def close_connection(exception):
@@ -23,7 +26,7 @@ def close_connection(exception):
 # Configurations for file uploads
 UPLOAD_FILES = 'static/files'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'pdf'}
-MAX_CONTENT_LENGTH = 5 * 1024 * 1024 #5MB limit
+MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5MB limit
 
 app.config['UPLOAD_FILES'] = UPLOAD_FILES
 app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
@@ -65,7 +68,7 @@ def signup():
             return redirect(url_for('signup'))
         
         try:
-            db=get_db()
+            db = get_db()
             cursor = db.cursor()
             cursor.execute('INSERT INTO users (username, email, password) VALUES (?, ?, ?)', (username, email, password))
             db.commit()
@@ -107,7 +110,7 @@ def profile():
     active_tab = request.args.get('tab', 'account')
     username = session['username']
 
-    db=get_db()
+    db = get_db()
     cursor = db.cursor()
 
     cursor.execute("SELECT id FROM users WHERE username=?", (username, ))
@@ -536,6 +539,10 @@ def delete_favourite(favourite_id):
 
     flash("Favourite removed successfully!", "success")
     return redirect(url_for('profile', tab='favourites'))
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
 
 # this is the app with debug on
 if __name__ == "__main__":
