@@ -80,7 +80,8 @@ def signup():
             db = get_db()
             cursor = db.cursor()
             cursor.execute(
-                'INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
+                '''INSERT INTO users (username, email, password)
+                VALUES (?, ?, ?)''',
                 (username, email, password))
             db.commit()
             flash('Account created!Please log in.', 'success')
