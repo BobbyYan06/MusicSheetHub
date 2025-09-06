@@ -79,8 +79,8 @@ def signup():
         try:
             db = get_db()
             cursor = db.cursor()
-            cursor.execute
-            ('INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
+            cursor.execute(
+                'INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
                 (username, email, password))
             db.commit()
             flash('Account created!Please log in.', 'success')
@@ -138,8 +138,8 @@ def profile():
         if form_type == 'profile_update':
             new_email = request.form.get('email')
             if new_email:
-                cursor.execute
-                ("UPDATE users SET email = ? WHERE username = ?",
+                cursor.execute(
+                    "UPDATE users SET email = ? WHERE username = ?",
                     (new_email, username))
                 flash("Email updated.", "success")
 
@@ -148,8 +148,8 @@ def profile():
             new_password = request.form.get('new_password')
             confirm_password = request.form.get('confirm_password')
 
-            cursor.execute
-            ("SELECT password FROM users WHERE username = ?", (username,))
+            cursor.execute(
+                "SELECT password FROM users WHERE username = ?", (username,))
             row = cursor.fetchone()
             if not row:
                 flash("User not found.", "danger")
@@ -189,9 +189,9 @@ def profile():
                 sheet_id = cursor.lastrowid
                 # Insert into SheetGenres
                 if genre_id:
-                    cursor.execute('''
-                        INSERT INTO SheetGenres (sid, gid) VALUES (?, ?)
-                    ''', (sheet_id, genre_id))
+                    cursor.execute(
+                        '''INSERT INTO SheetGenres (sid, gid) VALUES (?, ?)''',
+                        (sheet_id, genre_id))
 
                 db.commit()
                 flash('Sheet uploaded successfully.', 'success')
@@ -208,11 +208,10 @@ def profile():
     # Load user sheets if viewing sheets tab
     sheets = []
     if active_tab == 'sheets':
-        cursor.execute
-        ("SELECT id, filename, sheetname, composer, instrument, "
+        cursor.execute(
+            "SELECT id, filename, sheetname, composer, instrument, "
             "created_at FROM sheets WHERE uploader_id = ? "
-            "ORDER BY created_at DESC",
-         (user_id, ))
+            "ORDER BY created_at DESC", (user_id, ))
         sheets = cursor.fetchall()
 
     # Load user downloads if viewing downloads tab
@@ -229,13 +228,12 @@ def profile():
     # Load user favourites if viewing favourites tab
     favourites = []
     if active_tab == 'favourites':
-        cursor.execute("""
+        cursor.execute('''
         SELECT id, sheet_id, sheetname, filename,
         composer, instrument, favourited_at
         FROM favourites
         WHERE username = ?
-        ORDER BY favourited_at DESC
-        """, (username,))
+        ORDER BY favourited_at DESC ''', (username,))
         favourites = cursor.fetchall()
 
     print("Genres loaded:", genres)
@@ -265,12 +263,11 @@ def sheets():
         SELECT id, filename, sheetname, composer, instrument, download_count
         FROM sheets
         ORDER BY created_at DESC
-        LIMIT ? OFFSET ?
-    ''', (per_page, offset))
+        LIMIT ? OFFSET ?''', (per_page, offset))
     results = cursor.fetchall()
 
     # Fetch total number of sheets for pagination
-    cursor.execute('SELECT COUNT(*) FROM sheets')
+    cursor.execute("SELECT COUNT(*) FROM sheets")
     total_sheets = cursor.fetchone()[0]
     total_pages = (total_sheets + per_page - 1) // per_page
 
@@ -436,12 +433,13 @@ def sheet_detail(sheet_id):
             rating = int(request.form.get('rating'))
             if 1 <= rating <= 5:
                 # Insert or update user rating
-                cursor.execute('''
+                cursor.execute(
+                    '''
                     INSERT INTO ratings (sheet_id, user_id, rating)
                     VALUES (?, ?, ?)
                     ON CONFLICT(sheet_id, user_id) DO UPDATE
-                               SET rating = excluded.rating
-                ''', (sheet_id, user_id, rating))
+                    SET rating = excluded.rating''',
+                    (sheet_id, user_id, rating))
                 db.commit()
         else:
             comment = request.form.get('comment')
