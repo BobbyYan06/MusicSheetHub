@@ -159,8 +159,8 @@ def profile():
             elif new_password != confirm_password:
                 flash("New passwords do not match.", "danger")
             else:
-                cursor.execute
-                ("Update users SET password = ? WHERE username = ?",
+                cursor.execute(
+                    "Update users SET password = ? WHERE username = ?",
                     (new_password, username))
                 db.commit()
                 flash("Password updated successfully.", "success")
