@@ -322,7 +322,7 @@ def download_file(sheet_id):
 
     # Fetch sheet details
     cursor.execute(
-        "SELECT filename, sheetname, composer, instrument"
+        "SELECT filename, sheetname, composer, instrument "
         "FROM sheets WHERE id = ?",
         (sheet_id,))
     row = cursor.fetchone()
