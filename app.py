@@ -345,7 +345,7 @@ def download_file(sheet_id):
 @app.route('/favourite/<sheet_id>')
 def favourite_file(sheet_id):
     if 'username' not in session:
-        flash('Please log in to download', 'warning')
+        flash('Please log in to favourite', 'warning')
         return redirect(url_for('login'))
 
     db = get_db()
