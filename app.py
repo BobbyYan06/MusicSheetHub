@@ -3,6 +3,8 @@ from flask import Flask, render_template, redirect, request, flash, \
 import sqlite3
 import os
 from werkzeug.utils import secure_filename
+from werkzeug.security import generate_password_hash, check_password_hash
+
 
 app = Flask(__name__)
 app.secret_key = 'Bobby'
@@ -79,10 +81,11 @@ def signup():
         try:
             db = get_db()
             cursor = db.cursor()
+            hashed_password = generate_password_hash(password)
             cursor.execute(
                 '''INSERT INTO users (username, email, password)
                 VALUES (?, ?, ?)''',
-                (username, email, password))
+                (username, email, hashed_password))
             db.commit()
             flash('Account created!Please log in.', 'success')
         except sqlite3.IntegrityError:
@@ -108,7 +111,7 @@ def login():
             'SELECT password from Users where username = ?', (username, ))
         row = cursor.fetchone()
 
-        if row and row[0] == password:
+        if row and check_password_hash(row[0], password):
             session['username'] = username
             flash("Login success", 'success')
 
@@ -154,14 +157,15 @@ def profile():
             row = cursor.fetchone()
             if not row:
                 flash("User not found.", "danger")
-            elif row[0] != current_password:
+            elif not check_password_hash(row[0], current_password):
                 flash("Current password is incorrect.", "danger")
             elif new_password != confirm_password:
                 flash("New passwords do not match.", "danger")
             else:
+                hashed_new_password = generate_password_hash(new_password)
                 cursor.execute(
                     "Update users SET password = ? WHERE username = ?",
-                    (new_password, username))
+                    (hashed_new_password, username))
                 db.commit()
                 flash("Password updated successfully.", "success")
 
